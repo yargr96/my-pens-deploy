@@ -156,6 +156,48 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/layout/buger-menu/BurgerMenu.ts":
+/*!*********************************************!*\
+  !*** ./src/layout/buger-menu/BurgerMenu.ts ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+var BurgerMenu = function () {
+    var burger = document.querySelector('#burger');
+    var sidebar = document.querySelector('#sidebar');
+    burger.addEventListener('click', function () {
+        sidebar.classList.toggle('active');
+    });
+    var closeMenu = function () {
+        sidebar.classList.remove('active');
+    };
+    return { closeMenu: closeMenu };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (BurgerMenu);
+
+
+/***/ }),
+
+/***/ "./src/layout/buger-menu/index.ts":
+/*!****************************************!*\
+  !*** ./src/layout/buger-menu/index.ts ***!
+  \****************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _layout_buger_menu_BurgerMenu__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _layout_buger_menu_BurgerMenu__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/layout/buger-menu/BurgerMenu */ "./src/layout/buger-menu/BurgerMenu.ts");
+
+
+
+/***/ }),
+
 /***/ "./src/modules/gravity/Gravity.ts":
 /*!****************************************!*\
   !*** ./src/modules/gravity/Gravity.ts ***!
@@ -539,9 +581,11 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _styles_main_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/styles/main.scss */ "./src/styles/main.scss");
-/* harmony import */ var _modules_gravity__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/modules/gravity */ "./src/modules/gravity/index.ts");
-/* harmony import */ var _modules_sierpinski_triangle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/modules/sierpinski-triangle */ "./src/modules/sierpinski-triangle/index.ts");
-/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
+/* harmony import */ var _layout_buger_menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/layout/buger-menu */ "./src/layout/buger-menu/index.ts");
+/* harmony import */ var _modules_gravity__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/modules/gravity */ "./src/modules/gravity/index.ts");
+/* harmony import */ var _modules_sierpinski_triangle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/modules/sierpinski-triangle */ "./src/modules/sierpinski-triangle/index.ts");
+/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
+
 
 
 
@@ -549,27 +593,58 @@ __webpack_require__.r(__webpack_exports__);
 var navItems = [
     {
         text: 'Gravity',
-        module: _modules_gravity__WEBPACK_IMPORTED_MODULE_1__["default"],
+        module: _modules_gravity__WEBPACK_IMPORTED_MODULE_2__["default"],
     },
     {
         text: 'Sierpinski triangle',
-        module: _modules_sierpinski_triangle__WEBPACK_IMPORTED_MODULE_2__["default"],
+        module: _modules_sierpinski_triangle__WEBPACK_IMPORTED_MODULE_3__["default"],
     },
 ];
+var DEFAULT_ACTIVE_NAV_ELEMENT_INDEX = 0;
 var app = function () {
-    var renderLoop = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_3__["default"])();
+    var closeMenu = (0,_layout_buger_menu__WEBPACK_IMPORTED_MODULE_1__["default"])().closeMenu;
+    var renderLoop = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_4__["default"])();
     var mountElement = document.querySelector('#content');
     var navItemsContainer = document.querySelector('#nav-items');
-    navItems.forEach(function (_a) {
-        var text = _a.text, module = _a.module;
+    var navElements = navItems.map(function (_a) {
+        var text = _a.text;
         var item = document.createElement('div');
         item.className = 'sidebar__item';
         item.textContent = text;
-        item.addEventListener('click', function () {
-            mountElement.innerHTML = '';
-            module(mountElement, renderLoop);
+        return item;
+    });
+    var setActiveNavItem = function (index) {
+        navElements.forEach(function (element) {
+            element.classList.remove('active');
         });
-        navItemsContainer.appendChild(item);
+        navElements[index].classList.add('active');
+    };
+    var activeModuleIndex = DEFAULT_ACTIVE_NAV_ELEMENT_INDEX;
+    var mountModule = function (index) {
+        mountElement.innerHTML = '';
+        navItems[index].module(mountElement, renderLoop);
+        setActiveNavItem(index);
+    };
+    var setActiveModule = function (index) {
+        activeModuleIndex = index;
+        mountModule(index);
+    };
+    mountModule(activeModuleIndex);
+    navElements.forEach(function (element, index) {
+        navItemsContainer.appendChild(element);
+        element.addEventListener('click', function () {
+            setActiveModule(index);
+            closeMenu();
+        });
+    });
+    setActiveNavItem(DEFAULT_ACTIVE_NAV_ELEMENT_INDEX);
+    mountElement.addEventListener('click', closeMenu);
+    var timerId;
+    window.addEventListener('resize', function () {
+        clearTimeout(timerId);
+        timerId = setTimeout(function () {
+            mountModule(activeModuleIndex);
+        }, 200);
     });
 };
 document.addEventListener('DOMContentLoaded', app);
@@ -578,4 +653,4 @@ document.addEventListener('DOMContentLoaded', app);
 
 /******/ })()
 ;
-//# sourceMappingURL=bundle.5b602dc9.js.map
+//# sourceMappingURL=bundle.13e0aa5f.js.map
