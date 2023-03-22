@@ -9,16 +9,17 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 body {
   font-family: sans-serif;
-  overflow: hidden;
 }
 
 .page {
   display: flex;
-  height: 100vh;
+  height: 100%;
+  overflow-x: hidden;
 }
 .page__sidebar {
   width: 300px;
@@ -41,7 +42,7 @@ body {
 .sidebar {
   border-right: 1px solid #f8f9fa;
   color: #f8f9fa;
-  transform: translateX(-100%);
+  transform: translateX(calc(-100% - 10px));
   transition: transform 0.3s;
   position: absolute;
   top: 0;
@@ -120,5 +121,40 @@ body {
   margin: auto;
   width: 300px;
 }
+/*!*********************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js!./node_modules/postcss-loader/dist/cjs.js!./node_modules/sass-loader/dist/cjs.js!./src/components/Controls/Controls.module.scss ***!
+  \*********************************************************************************************************************************************************************************/
+.gt3pDgkwwEiE80E7zc56 {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  margin-left: auto;
+  max-width: max-content;
+}
 
-/*# sourceMappingURL=main.d6064902.css.map*/
+.W8QkwqrU18OQYVNUvMqP {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+.W8QkwqrU18OQYVNUvMqP:last-child {
+  margin-bottom: 0;
+}
+
+.eKqLYGWJnnBpB9duMYp1 {
+  color: #f8f9fa;
+  background-color: #0d6efd;
+  border: none;
+  padding: 6px 12px;
+  margin-right: 6px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  flex-grow: 1;
+}
+.eKqLYGWJnnBpB9duMYp1:last-child {
+  margin-right: 0;
+}
+
+/*# sourceMappingURL=main.c34024c3.css.map*/
