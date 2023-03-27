@@ -47,6 +47,21 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/modules/fractal-sets/FractalSets.module.scss":
+/*!**********************************************************!*\
+  !*** ./src/modules/fractal-sets/FractalSets.module.scss ***!
+  \**********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+// extracted by mini-css-extract-plugin
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({"canvas":"YFv7u5vznM8GqrW6cims"});
+
+/***/ }),
+
 /***/ "./src/styles/colors.module.scss":
 /*!***************************************!*\
   !*** ./src/styles/colors.module.scss ***!
@@ -276,6 +291,441 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/modules/fractal-sets/FractalSets.ts":
+/*!*************************************************!*\
+  !*** ./src/modules/fractal-sets/FractalSets.ts ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _gradient__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./gradient */ "./src/modules/fractal-sets/gradient.ts");
+/* harmony import */ var _components_Canvas__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/components/Canvas */ "./src/components/Canvas/index.ts");
+/* harmony import */ var _components_Controls__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/components/Controls */ "./src/components/Controls/index.ts");
+/* harmony import */ var _modules_fractal_sets_FractalSets_module_scss__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/modules/fractal-sets/FractalSets.module.scss */ "./src/modules/fractal-sets/FractalSets.module.scss");
+/* harmony import */ var _modules_fractal_sets_belongsToSet__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/modules/fractal-sets/belongsToSet */ "./src/modules/fractal-sets/belongsToSet.ts");
+/* harmony import */ var _modules_fractal_sets_iterativeRender__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/modules/fractal-sets/iterativeRender */ "./src/modules/fractal-sets/iterativeRender.ts");
+/* harmony import */ var _modules_fractal_sets_useCoordinates__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/modules/fractal-sets/useCoordinates */ "./src/modules/fractal-sets/useCoordinates.ts");
+/* harmony import */ var _utils_Vector__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @/utils/Vector */ "./src/utils/Vector.ts");
+/* harmony import */ var _utils_isTouchDevice__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @/utils/isTouchDevice */ "./src/utils/isTouchDevice.ts");
+/* harmony import */ var _utils_touchCoordinates__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @/utils/touchCoordinates */ "./src/utils/touchCoordinates.ts");
+var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+
+
+
+
+
+
+
+
+
+
+var gradient = (0,_gradient__WEBPACK_IMPORTED_MODULE_0__.getGradient)(_gradient__WEBPACK_IMPORTED_MODULE_0__.gradientPoints, _modules_fractal_sets_belongsToSet__WEBPACK_IMPORTED_MODULE_4__.ITERATIONS_COUNT);
+var BACKGROUND_COLOR = gradient[0];
+var C = [0.14, 0.6];
+var belongsToJuliaSet = function (z) { return (0,_modules_fractal_sets_belongsToSet__WEBPACK_IMPORTED_MODULE_4__.belongsToSet)(z, C); };
+var belongsToMandelbrotSet = function (c) { return (0,_modules_fractal_sets_belongsToSet__WEBPACK_IMPORTED_MODULE_4__.belongsToSet)([0, 0], c); };
+var setSelectButtons = [
+    {
+        text: 'Mandelbrot set',
+        key: 'mandelbrot',
+        value: belongsToMandelbrotSet,
+    },
+    {
+        text: 'Julia set',
+        key: 'julia',
+        value: belongsToJuliaSet,
+    },
+];
+var zoomButtons = [
+    {
+        text: '+',
+        key: 'plus',
+        value: 2,
+    },
+    {
+        text: '-',
+        key: 'minus',
+        value: 0.5,
+    },
+];
+var FractalSets = function (mountElement) {
+    var _a = (0,_components_Canvas__WEBPACK_IMPORTED_MODULE_1__["default"])(), canvas = _a.element, setSize = _a.setSize, append = _a.append, getContext = _a.getContext;
+    canvas.classList.add(_modules_fractal_sets_FractalSets_module_scss__WEBPACK_IMPORTED_MODULE_3__["default"].canvas);
+    setSize(mountElement, 1);
+    append(mountElement);
+    var context = getContext();
+    var PADDING = 20;
+    var coordinatesSquareSize = Math.min(canvas.width, canvas.height) - PADDING * 2;
+    var COORDINATE_SQUARE_MATH_SIZE = 4;
+    var pixelsPerOneMathCoordinateDefault = (coordinatesSquareSize / COORDINATE_SQUARE_MATH_SIZE);
+    var canvasCenterCoordinates = [canvas.width / 2, canvas.height / 2];
+    var coordinatesCenterDefault = canvasCenterCoordinates;
+    var belongsTo = belongsToMandelbrotSet;
+    var coordinates = (0,_modules_fractal_sets_useCoordinates__WEBPACK_IMPORTED_MODULE_6__["default"])({
+        coordinatesCenter: coordinatesCenterDefault,
+        pixelsPerOneMathCoordinate: pixelsPerOneMathCoordinateDefault,
+        canvas: canvas,
+    });
+    var render = function (_a) {
+        var _b = _a === void 0 ? {} : _a, _c = _b.isLowQuality, isLowQuality = _c === void 0 ? false : _c;
+        var renderingBounds = [
+            coordinates.getBoundingCanvasCoordinates([-2, 2]),
+            coordinates.getBoundingCanvasCoordinates([2, -2]),
+        ];
+        context.fillStyle = BACKGROUND_COLOR;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        (0,_modules_fractal_sets_iterativeRender__WEBPACK_IMPORTED_MODULE_5__["default"])({
+            start: renderingBounds[0],
+            end: renderingBounds[1],
+            isLowQuality: isLowQuality,
+            callback: function (_a, step) {
+                var x = _a[0], y = _a[1];
+                var mathCoordinates = coordinates.toMathCoordinates([x, y]);
+                var _b = belongsTo(mathCoordinates), value = _b.value, stepsCount = _b.stepsCount;
+                context.fillStyle = value
+                    ? '#000'
+                    : gradient[stepsCount];
+                context.fillRect(x, y, step, step);
+            },
+        });
+    };
+    var controls = (0,_components_Controls__WEBPACK_IMPORTED_MODULE_2__["default"])([
+        setSelectButtons,
+        zoomButtons,
+    ]);
+    controls.append(mountElement);
+    setSelectButtons.forEach(function (_a) {
+        var key = _a.key, value = _a.value;
+        controls.elements[key].addEventListener('click', function () {
+            belongsTo = value;
+            coordinates.setPixelsPerOneMathCoordinate(pixelsPerOneMathCoordinateDefault);
+            coordinates.setCoordinatesCenter(coordinatesCenterDefault);
+            render();
+        });
+    });
+    zoomButtons.forEach(function (_a) {
+        var key = _a.key, value = _a.value;
+        controls.elements[key].addEventListener('click', function () {
+            var centerAsMathCoords = coordinates.toMathCoordinates(canvasCenterCoordinates);
+            coordinates.setPixelsPerOneMathCoordinate(coordinates.getPixelsPerOneMathCoordinate() * value);
+            coordinates.setCenterToMathCoordinates(centerAsMathCoords);
+            render();
+        });
+    });
+    var isMouseDown = false;
+    var startMouseCoordinates;
+    var coordinatesChanged = false;
+    var imageData;
+    var deltaCoordinates;
+    var handleMouseDown = function (e) {
+        isMouseDown = true;
+        var _a = (0,_utils_touchCoordinates__WEBPACK_IMPORTED_MODULE_9__["default"])(e), offsetX = _a.offsetX, offsetY = _a.offsetY;
+        startMouseCoordinates = [offsetX, offsetY];
+    };
+    var handleMouseMove = function (e) {
+        if (!isMouseDown) {
+            return;
+        }
+        var _a = (0,_utils_touchCoordinates__WEBPACK_IMPORTED_MODULE_9__["default"])(e), offsetX = _a.offsetX, offsetY = _a.offsetY;
+        deltaCoordinates = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_7__.subtractVector)([offsetX, offsetY], startMouseCoordinates);
+        if ((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_7__.areSimilarVectors)(deltaCoordinates, [0, 0])) {
+            return;
+        }
+        coordinatesChanged = true;
+        imageData = imageData !== null && imageData !== void 0 ? imageData : context.getImageData(0, 0, canvas.width, canvas.height);
+        context.fillStyle = BACKGROUND_COLOR;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.putImageData.apply(context, __spreadArray([imageData], deltaCoordinates, false));
+    };
+    var handleMouseUp = function () {
+        if (!isMouseDown) {
+            return;
+        }
+        isMouseDown = false;
+        if (coordinatesChanged) {
+            coordinates.setCoordinatesCenter((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_7__.addVectors)(coordinates.getCoordinatesCenter(), deltaCoordinates));
+            deltaCoordinates = null;
+            imageData = null;
+            coordinatesChanged = false;
+            render();
+        }
+    };
+    if ((0,_utils_isTouchDevice__WEBPACK_IMPORTED_MODULE_8__["default"])()) {
+        canvas.addEventListener('touchstart', handleMouseDown);
+        canvas.addEventListener('touchmove', handleMouseMove);
+        window.addEventListener('touchend', handleMouseUp);
+    }
+    else {
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+    }
+    render();
+    return {
+        beforeUnmount: function () {
+            window.removeEventListener('mouseup', handleMouseUp);
+            window.removeEventListener('touchend', handleMouseUp);
+        },
+    };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (FractalSets);
+
+
+/***/ }),
+
+/***/ "./src/modules/fractal-sets/belongsToSet.ts":
+/*!**************************************************!*\
+  !*** ./src/modules/fractal-sets/belongsToSet.ts ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "ITERATIONS_COUNT": () => (/* binding */ ITERATIONS_COUNT),
+/* harmony export */   "belongsToSet": () => (/* binding */ belongsToSet)
+/* harmony export */ });
+/* harmony import */ var _utils_Vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/utils/Vector */ "./src/utils/Vector.ts");
+var __spreadArray = (undefined && undefined.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
+
+var getComplexNumberSquare = function (_a) {
+    var x = _a[0], y = _a[1];
+    return [
+        Math.pow(x, 2) - Math.pow(y, 2),
+        2 * x * y,
+    ];
+};
+var ITERATIONS_COUNT = 100;
+var belongsToSet = function (z0, c) {
+    var zLast = __spreadArray([], z0, true);
+    for (var i = 0; i < ITERATIONS_COUNT; i += 1) {
+        var zNew = ((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_0__.addVectors)(getComplexNumberSquare(zLast), c));
+        if (Math.pow(zNew[0], 2) + Math.pow(zNew[1], 2) > 4) {
+            return {
+                value: false,
+                stepsCount: i,
+            };
+        }
+        zLast = zNew;
+    }
+    return { value: true };
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/fractal-sets/gradient.ts":
+/*!**********************************************!*\
+  !*** ./src/modules/fractal-sets/gradient.ts ***!
+  \**********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "getGradient": () => (/* binding */ getGradient),
+/* harmony export */   "gradientPoints": () => (/* binding */ gradientPoints)
+/* harmony export */ });
+var addVector3 = function (a, b) { return [
+    a[0] + b[0],
+    a[1] + b[1],
+    a[2] + b[2],
+]; };
+var subtractVector3 = function (a, b) { return [
+    a[0] - b[0],
+    a[1] - b[1],
+    a[2] - b[2],
+]; };
+var multiplyVector3ByNumber = function (_a, number) {
+    var x = _a[0], y = _a[1], z = _a[2];
+    return [
+        x * number,
+        y * number,
+        z * number,
+    ];
+};
+var roundVector3 = function (vector) { return [
+    Math.round(vector[0]),
+    Math.round(vector[1]),
+    Math.round(vector[2]),
+]; };
+var gradientPoints = [
+    [248, 249, 250],
+    [25, 135, 84],
+];
+var vectorToColor = function (vector) { return "rgb(".concat(vector[0], ", ").concat(vector[1], ", ").concat(vector[2], ")"); };
+var getGradient = function (points, length) {
+    var colorsDifference = subtractVector3(points[1], points[0]);
+    var step = multiplyVector3ByNumber(colorsDifference, 1 / length);
+    var gradient = [];
+    for (var i = 0; i < length - 1; i += 1) {
+        gradient.push(addVector3(points[0], roundVector3(multiplyVector3ByNumber(step, i))));
+    }
+    gradient.push(points[1]);
+    return gradient.map(function (v) { return vectorToColor(v); });
+};
+
+
+/***/ }),
+
+/***/ "./src/modules/fractal-sets/index.ts":
+/*!*******************************************!*\
+  !*** ./src/modules/fractal-sets/index.ts ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* reexport safe */ _modules_fractal_sets_FractalSets__WEBPACK_IMPORTED_MODULE_0__["default"])
+/* harmony export */ });
+/* harmony import */ var _modules_fractal_sets_FractalSets__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/modules/fractal-sets/FractalSets */ "./src/modules/fractal-sets/FractalSets.ts");
+
+
+
+/***/ }),
+
+/***/ "./src/modules/fractal-sets/iterativeRender.ts":
+/*!*****************************************************!*\
+  !*** ./src/modules/fractal-sets/iterativeRender.ts ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
+
+var iterativeRender = function (_a) {
+    var start = _a.start, end = _a.end, _b = _a.step, step = _b === void 0 ? 16 : _b, callback = _a.callback, _c = _a.isLowQuality, isLowQuality = _c === void 0 ? false : _c;
+    var currentStep = step;
+    var isRecursiveCall = false;
+    var renderLoop = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_0__["default"])(function () {
+        for (var x = start[0], i = 0; x < end[0]; x += currentStep, i += 1) {
+            var isEvenColumn = i % 2 === 0;
+            var stepY = isEvenColumn && isRecursiveCall ? currentStep * 2 : currentStep;
+            var startY = isEvenColumn && isRecursiveCall
+                ? start[1] + currentStep
+                : start[1];
+            for (var y = startY; y < end[1]; y += stepY) {
+                callback([x, y], currentStep);
+            }
+        }
+        if (currentStep <= 1 || isLowQuality) {
+            renderLoop.stop();
+        }
+        currentStep /= 2;
+        isRecursiveCall = true;
+    });
+    renderLoop.run();
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (iterativeRender);
+
+
+/***/ }),
+
+/***/ "./src/modules/fractal-sets/useCoordinates.ts":
+/*!****************************************************!*\
+  !*** ./src/modules/fractal-sets/useCoordinates.ts ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _utils_Vector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/utils/Vector */ "./src/utils/Vector.ts");
+
+var useCoordinates = function (_a) {
+    var coordinatesCenter = _a.coordinatesCenter, pixelsPerOneMathCoordinate = _a.pixelsPerOneMathCoordinate, canvas = _a.canvas;
+    var properties = {
+        coordinatesCenter: coordinatesCenter,
+        pixelsPerOneMathCoordinate: pixelsPerOneMathCoordinate,
+    };
+    var canvasSize = [canvas.width, canvas.height];
+    var canvasCenter = [canvas.width / 2, canvas.height / 2];
+    var toShiftedCoordinates = function (canvasCoordinates) { return [
+        canvasCoordinates[0] - properties.coordinatesCenter[0],
+        canvasSize[1] - canvasCoordinates[1] - (canvasSize[1] - properties.coordinatesCenter[1]),
+    ]; };
+    var toUnshiftedCoordinates = function (shiftedCoordinates) { return [
+        shiftedCoordinates[0] + properties.coordinatesCenter[0],
+        canvasSize[1] - shiftedCoordinates[1] - (canvasSize[1] - properties.coordinatesCenter[1]),
+    ]; };
+    var toMathCoordinates = function (canvasCoordinates) {
+        var shiftedCoordinates = toShiftedCoordinates(canvasCoordinates);
+        return (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_0__.multiplyVectorByNumber)(shiftedCoordinates, 1 / properties.pixelsPerOneMathCoordinate);
+    };
+    var toCanvasCoordinates = function (mathCoordinates) {
+        var shiftedCoordinates = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_0__.multiplyVectorByNumber)(mathCoordinates, properties.pixelsPerOneMathCoordinate);
+        var unshiftedCoordinates = toUnshiftedCoordinates(shiftedCoordinates);
+        return [
+            Math.round(unshiftedCoordinates[0]),
+            Math.round(unshiftedCoordinates[1]),
+        ];
+    };
+    var getBoundingCanvasCoordinates = function (mathCoordinates) {
+        var canvasCoordinates = toCanvasCoordinates(mathCoordinates);
+        if (canvasCoordinates[0] < 0) {
+            canvasCoordinates[0] = 0;
+        }
+        if (canvasCoordinates[0] > canvasSize[0]) {
+            canvasCoordinates[0] = canvasSize[0];
+        }
+        if (canvasCoordinates[1] < 0) {
+            canvasCoordinates[1] = 0;
+        }
+        if (canvasCoordinates[1] > canvasSize[1]) {
+            canvasCoordinates[1] = canvasSize[1];
+        }
+        return canvasCoordinates;
+    };
+    var setCenterToMathCoordinates = function (mathCoordinates) {
+        var mathCoordinatesInCanvasCoords = toCanvasCoordinates(mathCoordinates);
+        var vectorToTargetCoords = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_0__.subtractVector)(mathCoordinatesInCanvasCoords, properties.coordinatesCenter);
+        properties.coordinatesCenter = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_0__.subtractVector)(canvasCenter, vectorToTargetCoords);
+    };
+    var setCoordinatesCenter = function (value) {
+        properties.coordinatesCenter = value;
+    };
+    var setPixelsPerOneMathCoordinate = function (value) {
+        properties.pixelsPerOneMathCoordinate = value;
+    };
+    var getCoordinatesCenter = function () { return properties.coordinatesCenter; };
+    var getPixelsPerOneMathCoordinate = function () { return properties.pixelsPerOneMathCoordinate; };
+    return {
+        toMathCoordinates: toMathCoordinates,
+        toCanvasCoordinates: toCanvasCoordinates,
+        getBoundingCanvasCoordinates: getBoundingCanvasCoordinates,
+        setCoordinatesCenter: setCoordinatesCenter,
+        setPixelsPerOneMathCoordinate: setPixelsPerOneMathCoordinate,
+        getCoordinatesCenter: getCoordinatesCenter,
+        getPixelsPerOneMathCoordinate: getPixelsPerOneMathCoordinate,
+        setCenterToMathCoordinates: setCenterToMathCoordinates,
+    };
+};
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (useCoordinates);
+
+
+/***/ }),
+
 /***/ "./src/modules/game-of-life/GameOfLife.ts":
 /*!************************************************!*\
   !*** ./src/modules/game-of-life/GameOfLife.ts ***!
@@ -286,17 +736,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _modules_game_of_life_useGrid__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/modules/game-of-life/useGrid */ "./src/modules/game-of-life/useGrid.ts");
-/* harmony import */ var _modules_game_of_life_useFieldMatrix__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/modules/game-of-life/useFieldMatrix */ "./src/modules/game-of-life/useFieldMatrix.ts");
-/* harmony import */ var _modules_game_of_life_figures_life__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/modules/game-of-life/figures/life */ "./src/modules/game-of-life/figures/life.ts");
-/* harmony import */ var _modules_game_of_life_controls__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/modules/game-of-life/controls */ "./src/modules/game-of-life/controls.ts");
-/* harmony import */ var _components_Canvas__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/components/Canvas */ "./src/components/Canvas/index.ts");
-/* harmony import */ var _components_Controls__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/components/Controls */ "./src/components/Controls/index.ts");
-/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
+/* harmony import */ var _components_Canvas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/components/Canvas */ "./src/components/Canvas/index.ts");
+/* harmony import */ var _components_Controls__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/components/Controls */ "./src/components/Controls/index.ts");
+/* harmony import */ var _modules_game_of_life_controls__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/modules/game-of-life/controls */ "./src/modules/game-of-life/controls.ts");
+/* harmony import */ var _modules_game_of_life_figures_life__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/modules/game-of-life/figures/life */ "./src/modules/game-of-life/figures/life.ts");
+/* harmony import */ var _modules_game_of_life_useFieldMatrix__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/modules/game-of-life/useFieldMatrix */ "./src/modules/game-of-life/useFieldMatrix.ts");
+/* harmony import */ var _modules_game_of_life_useGrid__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/modules/game-of-life/useGrid */ "./src/modules/game-of-life/useGrid.ts");
+/* harmony import */ var _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @/styles/colors.module.scss */ "./src/styles/colors.module.scss");
 /* harmony import */ var _utils_Vector__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @/utils/Vector */ "./src/utils/Vector.ts");
-/* harmony import */ var _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @/styles/colors.module.scss */ "./src/styles/colors.module.scss");
+/* harmony import */ var _utils_isTouchDevice__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @/utils/isTouchDevice */ "./src/utils/isTouchDevice.ts");
 /* harmony import */ var _utils_touchCoordinates__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @/utils/touchCoordinates */ "./src/utils/touchCoordinates.ts");
-/* harmony import */ var _utils_isTouchDevice__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @/utils/isTouchDevice */ "./src/utils/isTouchDevice.ts");
+/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
 
 
 
@@ -319,7 +769,7 @@ var renderMatrix = function (fieldMatrix, renderCell) {
     });
 };
 var GameOfLife = function (mountElement) {
-    var _a = (0,_components_Canvas__WEBPACK_IMPORTED_MODULE_4__["default"])(), canvas = _a.element, setSize = _a.setSize, append = _a.append, getContext = _a.getContext;
+    var _a = (0,_components_Canvas__WEBPACK_IMPORTED_MODULE_0__["default"])(), canvas = _a.element, setSize = _a.setSize, append = _a.append, getContext = _a.getContext;
     setSize(mountElement, 1);
     append(mountElement);
     var context = getContext();
@@ -331,24 +781,24 @@ var GameOfLife = function (mountElement) {
         framesPerSecond: 10,
     };
     var render = function () {
-        grid = (0,_modules_game_of_life_useGrid__WEBPACK_IMPORTED_MODULE_0__["default"])({
+        grid = (0,_modules_game_of_life_useGrid__WEBPACK_IMPORTED_MODULE_5__["default"])({
             canvas: canvas,
             context: context,
             cellSize: config.cellSize,
             showGrid: config.cellSize >= 10,
             colors: {
-                colorBackground: _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_8__["default"].dark,
-                colorGrid: _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_8__["default"].gray800,
-                colorCell: _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_8__["default"].primary,
+                colorBackground: _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_6__["default"].dark,
+                colorGrid: _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_6__["default"].gray800,
+                colorCell: _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_6__["default"].primary,
             },
         });
-        fieldMatrix = (0,_modules_game_of_life_useFieldMatrix__WEBPACK_IMPORTED_MODULE_1__["default"])({
+        fieldMatrix = (0,_modules_game_of_life_useFieldMatrix__WEBPACK_IMPORTED_MODULE_4__["default"])({
             gridSize: {
                 xCellsCount: grid.gridSizeParams.xCellsCount,
                 yCellsCount: grid.gridSizeParams.yCellsCount,
             },
         });
-        renderLoop = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_6__["default"])(function () {
+        renderLoop = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_10__["default"])(function () {
             var isUpdated = fieldMatrix.updateGeneration();
             if (!isUpdated) {
                 renderLoop.stop();
@@ -357,11 +807,11 @@ var GameOfLife = function (mountElement) {
             renderMatrix(fieldMatrix.getMatrix(), grid.renderCell);
         }, { framesPerSecond: config.framesPerSecond });
         grid.renderGrid();
-        fieldMatrix.putFigureToCenter(_modules_game_of_life_figures_life__WEBPACK_IMPORTED_MODULE_2__["default"]);
+        fieldMatrix.putFigureToCenter(_modules_game_of_life_figures_life__WEBPACK_IMPORTED_MODULE_3__["default"]);
         renderMatrix(fieldMatrix.getMatrix(), grid.renderCell);
     };
     render();
-    var controls = (0,_components_Controls__WEBPACK_IMPORTED_MODULE_5__["default"])(_modules_game_of_life_controls__WEBPACK_IMPORTED_MODULE_3__["default"]);
+    var controls = (0,_components_Controls__WEBPACK_IMPORTED_MODULE_1__["default"])(_modules_game_of_life_controls__WEBPACK_IMPORTED_MODULE_2__["default"]);
     controls.append(mountElement);
     controls.elements.play.addEventListener('click', function () {
         renderLoop.toggle();
@@ -383,13 +833,13 @@ var GameOfLife = function (mountElement) {
         config.cellSize = size;
         render();
     };
-    _modules_game_of_life_controls__WEBPACK_IMPORTED_MODULE_3__.sizeControls.forEach(function (_a) {
+    _modules_game_of_life_controls__WEBPACK_IMPORTED_MODULE_2__.sizeControls.forEach(function (_a) {
         var key = _a.key, value = _a.value;
         controls.elements[key].addEventListener('click', function () {
             changeSize(value);
         });
     });
-    _modules_game_of_life_controls__WEBPACK_IMPORTED_MODULE_3__.speedControls.forEach(function (_a) {
+    _modules_game_of_life_controls__WEBPACK_IMPORTED_MODULE_2__.speedControls.forEach(function (_a) {
         var key = _a.key, value = _a.value;
         controls.elements[key].addEventListener('click', function () {
             config.framesPerSecond = value;
@@ -431,7 +881,7 @@ var GameOfLife = function (mountElement) {
         }
         drawCell([offsetX, offsetY]);
     };
-    if ((0,_utils_isTouchDevice__WEBPACK_IMPORTED_MODULE_10__["default"])()) {
+    if ((0,_utils_isTouchDevice__WEBPACK_IMPORTED_MODULE_8__["default"])()) {
         canvas.addEventListener('touchstart', handleMouseDown);
         window.addEventListener('touchend', handleMouseUp);
         canvas.addEventListener('touchmove', handleMouseMove);
@@ -855,10 +1305,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _components_Canvas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/components/Canvas */ "./src/components/Canvas/index.ts");
-/* harmony import */ var _utils_Particle__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/utils/Particle */ "./src/utils/Particle.ts");
-/* harmony import */ var _utils_Vector__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/utils/Vector */ "./src/utils/Vector.ts");
-/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
-/* harmony import */ var _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/styles/colors.module.scss */ "./src/styles/colors.module.scss");
+/* harmony import */ var _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/styles/colors.module.scss */ "./src/styles/colors.module.scss");
+/* harmony import */ var _utils_Particle__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/utils/Particle */ "./src/utils/Particle.ts");
+/* harmony import */ var _utils_Vector__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/utils/Vector */ "./src/utils/Vector.ts");
+/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
 
 
 
@@ -879,7 +1329,7 @@ var Gravity = function (mountElement) {
     var mouse = [canvas.width / 2, canvas.height / 2];
     var halfParticleSize = config.particleSize / 2;
     var clear = function () {
-        context.fillStyle = _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_4__["default"].dark;
+        context.fillStyle = _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_1__["default"].dark;
         context.fillRect(0, 0, canvas.width, canvas.height);
     };
     var isParticleOutOfBounds = function (particle) {
@@ -896,11 +1346,11 @@ var Gravity = function (mountElement) {
     };
     var getUpdatedParticle = function (_a) {
         var position = _a.position, velocity = _a.velocity;
-        var angle = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_2__.getVectorAngle)((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_2__.subtractVector)(mouse, position));
-        var particle = (0,_utils_Particle__WEBPACK_IMPORTED_MODULE_1__.getMovedParticle)({
+        var angle = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_3__.getVectorAngle)((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_3__.subtractVector)(mouse, position));
+        var particle = (0,_utils_Particle__WEBPACK_IMPORTED_MODULE_2__.getMovedParticle)({
             position: position,
-            acceleration: (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_2__.polarToCartesianVector)(config.speed, angle),
-            velocity: (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_2__.multiplyVectorByNumber)(velocity, config.decelerationCoefficient),
+            acceleration: (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_3__.polarToCartesianVector)(config.speed, angle),
+            velocity: (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_3__.multiplyVectorByNumber)(velocity, config.decelerationCoefficient),
         });
         var isOutOfBounds = isParticleOutOfBounds(particle);
         if (isOutOfBounds.x) {
@@ -926,10 +1376,10 @@ var Gravity = function (mountElement) {
     };
     var render = function () {
         setupParticles(config.pointsCount);
-        var run = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_3__["default"])(function () {
+        var run = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_4__["default"])(function () {
             clear();
             updateParticles();
-            context.fillStyle = _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_4__["default"].light;
+            context.fillStyle = _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_1__["default"].light;
             particles.forEach(function (_a) {
                 var _b = _a.position, x = _b[0], y = _b[1];
                 context.beginPath();
@@ -942,7 +1392,7 @@ var Gravity = function (mountElement) {
     render();
     canvas.addEventListener('mousemove', function (_a) {
         var offsetX = _a.offsetX, offsetY = _a.offsetY;
-        mouse = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_2__.multiplyVectorByNumber)([offsetX, offsetY], _components_Canvas__WEBPACK_IMPORTED_MODULE_0__.DEFAULT_CANVAS_SCALE);
+        mouse = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_3__.multiplyVectorByNumber)([offsetX, offsetY], _components_Canvas__WEBPACK_IMPORTED_MODULE_0__.DEFAULT_CANVAS_SCALE);
     });
     return {};
 };
@@ -979,9 +1429,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _components_Canvas__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/components/Canvas */ "./src/components/Canvas/index.ts");
 /* harmony import */ var _components_Range__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/components/Range */ "./src/components/Range/index.ts");
-/* harmony import */ var _utils_Vector__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/utils/Vector */ "./src/utils/Vector.ts");
-/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
-/* harmony import */ var _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/styles/colors.module.scss */ "./src/styles/colors.module.scss");
+/* harmony import */ var _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/styles/colors.module.scss */ "./src/styles/colors.module.scss");
+/* harmony import */ var _utils_Vector__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/utils/Vector */ "./src/utils/Vector.ts");
+/* harmony import */ var _utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/utils/useRenderLoop */ "./src/utils/useRenderLoop.ts");
 
 
 
@@ -993,8 +1443,8 @@ var getBasePoints = function (count, centerCoordinate) {
     var angleStep = (2 * Math.PI) / count;
     var basePoints = [];
     for (var i = 0; i < count; i += 1) {
-        var angle = angleStep * i + _utils_Vector__WEBPACK_IMPORTED_MODULE_2__.CLOCK_ANGLE_OFFSET;
-        basePoints.push((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_2__.addVectors)((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_2__.polarToCartesianVector)(radius, angle), centerCoordinate));
+        var angle = angleStep * i + _utils_Vector__WEBPACK_IMPORTED_MODULE_3__.CLOCK_ANGLE_OFFSET;
+        basePoints.push((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_3__.addVectors)((0,_utils_Vector__WEBPACK_IMPORTED_MODULE_3__.polarToCartesianVector)(radius, angle), centerCoordinate));
     }
     return basePoints;
 };
@@ -1009,20 +1459,20 @@ var SierpinskiTriangle = function (mountElement) {
         canvas.height / 2,
     ];
     var render = function () {
-        context.fillStyle = _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_4__["default"].dark;
+        context.fillStyle = _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_2__["default"].dark;
         context.fillRect(0, 0, canvas.width, canvas.height);
-        context.fillStyle = _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_4__["default"].light;
+        context.fillStyle = _styles_colors_module_scss__WEBPACK_IMPORTED_MODULE_2__["default"].light;
         var basePoints = getBasePoints(basePointsCount, centerCoordinate);
         basePoints.forEach(function (_a) {
             var x = _a[0], y = _a[1];
             context.fillRect(x, y, 1, 1);
         });
         var lastPoint = basePoints[0];
-        var run = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_3__["default"])(function () {
+        var run = (0,_utils_useRenderLoop__WEBPACK_IMPORTED_MODULE_4__["default"])(function () {
             for (var i = 0; i < 100; i += 1) {
                 var nextPointIndex = Math.floor(Math.random() * basePoints.length);
                 var nextPoint = basePoints[nextPointIndex];
-                var newPoint = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_2__.getPointBetween)(lastPoint, nextPoint);
+                var newPoint = (0,_utils_Vector__WEBPACK_IMPORTED_MODULE_3__.getPointBetween)(lastPoint, nextPoint);
                 context.fillRect(newPoint[0], newPoint[1], 2, 2);
                 lastPoint = newPoint;
             }
@@ -1309,9 +1759,11 @@ var __webpack_exports__ = {};
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _styles_main_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @/styles/main.scss */ "./src/styles/main.scss");
 /* harmony import */ var _layout_buger_menu__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @/layout/buger-menu */ "./src/layout/buger-menu/index.ts");
-/* harmony import */ var _modules_gravity__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/modules/gravity */ "./src/modules/gravity/index.ts");
-/* harmony import */ var _modules_sierpinski_triangle__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/modules/sierpinski-triangle */ "./src/modules/sierpinski-triangle/index.ts");
-/* harmony import */ var _modules_game_of_life__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/modules/game-of-life */ "./src/modules/game-of-life/index.ts");
+/* harmony import */ var _modules_fractal_sets__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/modules/fractal-sets */ "./src/modules/fractal-sets/index.ts");
+/* harmony import */ var _modules_game_of_life__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/modules/game-of-life */ "./src/modules/game-of-life/index.ts");
+/* harmony import */ var _modules_gravity__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @/modules/gravity */ "./src/modules/gravity/index.ts");
+/* harmony import */ var _modules_sierpinski_triangle__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @/modules/sierpinski-triangle */ "./src/modules/sierpinski-triangle/index.ts");
+
 
 
 
@@ -1319,16 +1771,20 @@ __webpack_require__.r(__webpack_exports__);
 
 var navItems = [
     {
+        text: 'Fractal sets',
+        module: _modules_fractal_sets__WEBPACK_IMPORTED_MODULE_2__["default"],
+    },
+    {
         text: 'Game of Life',
-        module: _modules_game_of_life__WEBPACK_IMPORTED_MODULE_4__["default"],
+        module: _modules_game_of_life__WEBPACK_IMPORTED_MODULE_3__["default"],
     },
     {
         text: 'Gravity',
-        module: _modules_gravity__WEBPACK_IMPORTED_MODULE_2__["default"],
+        module: _modules_gravity__WEBPACK_IMPORTED_MODULE_4__["default"],
     },
     {
         text: 'Sierpinski triangle',
-        module: _modules_sierpinski_triangle__WEBPACK_IMPORTED_MODULE_3__["default"],
+        module: _modules_sierpinski_triangle__WEBPACK_IMPORTED_MODULE_5__["default"],
     },
 ];
 var DEFAULT_ACTIVE_NAV_ELEMENT_INDEX = 0;
@@ -1386,4 +1842,4 @@ document.addEventListener('DOMContentLoaded', app);
 
 /******/ })()
 ;
-//# sourceMappingURL=bundle.1e979525.js.map
+//# sourceMappingURL=bundle.d6b316ee.js.map
